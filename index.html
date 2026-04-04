@@ -3,136 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Player - GW TEAM</title>
-    
-    <!-- Shaka Player UI CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.min.css">
-    
+    <title>Open Source HLS Player with Proxy</title>
+    <!-- Import open-source HLS.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* Base styles for a professional, full-screen responsive look */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            overflow: hidden;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        /* Container for the player */
-        .video-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-        }
-
-        /* The actual video element */
-        video {
-            width: 100%;
-            height: 100%;
-            outline: none;
-        }
-
-        /* Top Right Branding CSS */
-        .branding {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 999;
-            background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
-            color: #ffffff;
-            padding: 8px 16px;
-            font-size: 16px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            pointer-events: none; /* Prevents blocking clicks on the video */
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            user-select: none;
-        }
-
-        /* Ensures Shaka UI takes full space */
-        .shaka-video-container {
-            width: 100%;
-            height: 100%;
-        }
+        body { background-color: #121212; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: Arial, sans-serif; }
+        video { width: 80%; max-width: 800px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
-    <!-- Video Container -->
-    <div class="video-container" data-shaka-player-container>
-        <!-- GW TEAM Branding -->
-        <div class="branding">GW TEAM</div>
-        
-        <!-- Video Element -->
-        <video data-shaka-player id="video" autoplay></video>
-    </div>
-
-    <!-- Shaka Player UI JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
+    <h2>Open Source Stream Player</h2>
+    <video id="video" controls autoplay></video>
 
     <script>
-        // Extracting your stream details
-        const streamUrl = 'https://dash.vodep39240327.workers.dev/?url=https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_HD1_Hindi_BTS/output/index.mpd&name=Star_Sports_HD1_Hindi&keyId=400131994b445d8c8817202248760fda&key=2d56cb6f07a75b9aff165d534ae2bfc4&cookie=__hdnea__=st=1775299210~exp=1775320810~acl=/*~hmac=df800a88c7a9bbafdcb79f6a1cc631a7c46a1e0acac3746881482f622aa518b5';
+        var video = document.getElementById('video');
         
-        // DRM Keys extracted from your URL
-        const clearKeyId = '400131994b445d8c8817202248760fda';
-        const clearKeyValue = '2d56cb6f07a75b9aff165d534ae2bfc4';
+        // Your video link
+        var streamUrl = "https://tgs5.myturn1.top:8088/mobile/stream5_320p/playlist.m3u8?id=19&pk=641a646e0ad17f9baaf3f910c201e2e2790b6cd2375d5b2889966f22d4b2b3cf48da4105eb96f7f0c88d5d08320e12a69bc88410078628bb7e7bd22fa0ac0a2e";
 
-        async function initPlayer() {
-            const video = document.getElementById('video');
-            const videoContainer = document.querySelector('.video-container');
+        /* 
+          VPN / PROXY ROUTING:
+          If the stream is blocked in your country, you can prepend an open-source proxy URL here.
+          Example using a public proxy (for testing only):
+          var proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(streamUrl);
+        */
+        
+        var finalUrl = streamUrl; // Change this to proxyUrl if you set up a proxy
 
-            // Initialize Shaka Player
-            const player = new shaka.Player(video);
-            
-            // Set up the Shaka UI overlay
-            const ui = new shaka.ui.Overlay(player, videoContainer, video);
-            
-            // Configure UI Controls
-            ui.configure({
-                controlPanelElements: [
-                    'play_pause', 'time_and_duration', 'spacer', 'mute', 
-                    'volume', 'fullscreen', 'overflow_menu'
-                ]
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(finalUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.play();
             });
-
-            // Listen for player errors
-            player.addEventListener('error', onPlayerErrorEvent);
-
-            // Apply ClearKey DRM configuration
-            player.configure({
-                drm: {
-                    clearKeys: {
-                        [clearKeyId]: clearKeyValue
-                    }
-                }
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Native support for Apple devices (Safari)
+            video.src = finalUrl;
+            video.addEventListener('loadedmetadata', function() {
+                video.play();
             });
-
-            // Try to load the stream
-            try {
-                await player.load(streamUrl);
-                console.log('Stream loaded successfully.');
-            } catch (error) {
-                console.error('Error loading stream:', error);
-            }
         }
-
-        function onPlayerErrorEvent(event) {
-            console.error('Shaka Player Error:', event.detail);
-        }
-
-        // Initialize player once DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', initPlayer);
     </script>
+
 </body>
 </html>
