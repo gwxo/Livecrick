@@ -70,7 +70,6 @@
 <body>
 
     <div class="player-container">
-        
         <!-- GW TEAM BRANDING OVERLAY -->
         <div class="branding">
             <span>Gw Team</span> 
@@ -86,17 +85,31 @@
         // Your video link
         var streamUrl = "https://tgs5.myturn1.top:8088/mobile/stream5_320p/playlist.m3u8?id=19&pk=641a646e0ad17f9baaf3f910c201e2e2790b6cd2375d5b2889966f22d4b2b3cf48da4105eb96f7f0c88d5d08320e12a69bc88410078628bb7e7bd22fa0ac0a2e";
 
-        // Initialize HLS.js
+        // --- FREE PROXY / "IN-BROWSER VPN" SETUP ---
+        // This acts as a VPN by routing the video traffic through an external server.
+        // Option 1: https://corsproxy.io/?
+        // Option 2: https://api.allorigins.win/raw?url=
+        var proxyUrl = "https://video-proxy.codewithprashant07.workers.dev/"; 
+
         if (Hls.isSupported()) {
-            var hls = new Hls();
+            var hls = new Hls({
+                // This intercepts every request (manifest and video chunks) and routes it through the proxy
+                xhrSetup: function(xhr, url) {
+                    // Prepend the proxy URL to bypass blocks and hide the user's direct connection
+                    xhr.open('GET', proxyUrl + encodeURIComponent(url), true);
+                }
+            });
+            
             hls.loadSource(streamUrl);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
                 video.play();
             });
+            
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             // Native support for Apple devices (Safari/iOS)
-            video.src = streamUrl;
+            // Note: Safari handles HLS natively, so we proxy the initial manifest link.
+            video.src = proxyUrl + encodeURIComponent(streamUrl);
             video.addEventListener('loadedmetadata', function() {
                 video.play();
             });
