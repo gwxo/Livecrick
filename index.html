@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream - GW TEAM</title>
+    <title>Live Stream Player - GW TEAM</title>
+    
+    <!-- Shaka Player UI CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.min.css">
     
     <style>
-        /* Base Reset */
+        /* Base styles for a professional, full-screen responsive look */
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #000000;
-            overflow: hidden; /* Prevents scrollbars */
+            background-color: #000;
+            overflow: hidden;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* Container for the player */
-        .player-wrapper {
-            position: relative;
+        .video-container {
             width: 100vw;
             height: 100vh;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
             background: #000;
+        }
+
+        /* The actual video element */
+        video {
+            width: 100%;
+            height: 100%;
+            outline: none;
         }
 
         /* Top Right Branding CSS */
@@ -34,64 +44,95 @@
             top: 20px;
             right: 20px;
             z-index: 999;
-            background: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+            background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
             color: #ffffff;
-            padding: 8px 18px;
+            padding: 8px 16px;
             font-size: 16px;
             font-weight: 800;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            pointer-events: none; /* Crucial: lets users click the fullscreen button behind the logo */
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none; /* Prevents blocking clicks on the video */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
             user-select: none;
         }
 
-        /* Iframe styling - covers the whole screen */
-        iframe {
+        /* Ensures Shaka UI takes full space */
+        .shaka-video-container {
             width: 100%;
             height: 100%;
-            border: none;
-            z-index: 10;
-            position: relative;
-        }
-
-        /* Professional Loading Spinner (shows while iframe loads) */
-        .loader {
-            position: absolute;
-            z-index: 1;
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #00a8ff; /* Clean blue accent */
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-    <div class="player-wrapper">
+    <!-- Video Container -->
+    <div class="video-container" data-shaka-player-container>
         <!-- GW TEAM Branding -->
         <div class="branding">GW TEAM</div>
         
-        <!-- Loading Spinner -->
-        <div class="loader"></div>
-        
-        <!-- Embedded Video Player -->
-        <iframe 
-            src="https://allrounder-live.pages.dev/star/modder-guy" 
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
-            allowfullscreen>
-        </iframe>
+        <!-- Video Element -->
+        <video data-shaka-player id="video" autoplay></video>
     </div>
 
+    <!-- Shaka Player UI JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
+
+    <script>
+        // Extracting your stream details
+        const streamUrl = 'https://dash.vodep39240327.workers.dev/?url=https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_HD1_Hindi_BTS/output/index.mpd&name=Star_Sports_HD1_Hindi&keyId=400131994b445d8c8817202248760fda&key=2d56cb6f07a75b9aff165d534ae2bfc4&cookie=__hdnea__=st=1775299210~exp=1775320810~acl=/*~hmac=df800a88c7a9bbafdcb79f6a1cc631a7c46a1e0acac3746881482f622aa518b5';
+        
+        // DRM Keys extracted from your URL
+        const clearKeyId = '400131994b445d8c8817202248760fda';
+        const clearKeyValue = '2d56cb6f07a75b9aff165d534ae2bfc4';
+
+        async function initPlayer() {
+            const video = document.getElementById('video');
+            const videoContainer = document.querySelector('.video-container');
+
+            // Initialize Shaka Player
+            const player = new shaka.Player(video);
+            
+            // Set up the Shaka UI overlay
+            const ui = new shaka.ui.Overlay(player, videoContainer, video);
+            
+            // Configure UI Controls
+            ui.configure({
+                controlPanelElements: [
+                    'play_pause', 'time_and_duration', 'spacer', 'mute', 
+                    'volume', 'fullscreen', 'overflow_menu'
+                ]
+            });
+
+            // Listen for player errors
+            player.addEventListener('error', onPlayerErrorEvent);
+
+            // Apply ClearKey DRM configuration
+            player.configure({
+                drm: {
+                    clearKeys: {
+                        [clearKeyId]: clearKeyValue
+                    }
+                }
+            });
+
+            // Try to load the stream
+            try {
+                await player.load(streamUrl);
+                console.log('Stream loaded successfully.');
+            } catch (error) {
+                console.error('Error loading stream:', error);
+            }
+        }
+
+        function onPlayerErrorEvent(event) {
+            console.error('Shaka Player Error:', event.detail);
+        }
+
+        // Initialize player once DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initPlayer);
+    </script>
 </body>
 </html>
