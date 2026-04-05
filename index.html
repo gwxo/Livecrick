@@ -3,28 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DILLZY — Live Stream Player</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<title>GW TEAM — Live Stream</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --surface2: #181c23;
-    --accent: #3b82f6;
-    --accent2: #60a5fa;
-    --glow: rgba(59,130,246,0.35);
-    --red: #ef4444;
-    --text: #f0f4ff;
-    --muted: #6b7280;
-    --border: rgba(255,255,255,0.07);
+    --bg-color: #050505;
+    --surface-glass: rgba(20, 20, 25, 0.6);
+    --surface-solid: #15161c;
+    --accent-1: #3b82f6; /* Blue */
+    --accent-2: #8b5cf6; /* Purple */
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --red: #f43f5e;
   }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -33,78 +36,62 @@
     overflow-x: hidden;
   }
 
-  /* ─── BG GRID ─── */
+  /* ─── ANIMATED BACKGROUND ─── */
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(59,130,246,0.15), transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(139,92,246,0.15), transparent 40%);
     z-index: 0;
+    pointer-events: none;
+    animation: drift 20s infinite alternate linear;
   }
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.12) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
+  @keyframes drift {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(15deg); }
   }
 
-  /* ─── NAV BAR ─── */
+  /* ─── NAVBAR ─── */
   .navbar {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 520px;
+    max-width: 600px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 20px 0;
+    padding: 24px 20px;
   }
 
   .logo {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
-    letter-spacing: 4px;
-    background: linear-gradient(135deg, #fff 30%, var(--accent2));
+    font-size: 36px;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #fff, var(--accent-1));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
     position: relative;
   }
   .logo::after {
     content: 'LIVE';
     position: absolute;
-    top: -4px;
-    right: -36px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 9px;
+    top: -2px;
+    right: -38px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
     background: var(--red);
     -webkit-text-fill-color: #fff;
-    color: #fff;
-    padding: 2px 5px;
-    border-radius: 4px;
-    animation: pulse-badge 1.5s infinite;
-  }
-  
-  @keyframes pulse-badge {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    padding: 3px 6px;
+    border-radius: 6px;
+    animation: pulse-badge 2s infinite;
   }
 
-  .nav-dot {
-    width: 8px; height: 8px;
-    background: var(--red);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--red);
-    animation: pulse-badge 1.5s infinite;
+  @keyframes pulse-badge {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0px var(--red); }
+    50% { opacity: 0.6; box-shadow: 0 0 10px var(--red); }
   }
 
   /* ─── MAIN CONTAINER ─── */
@@ -112,236 +99,263 @@
     position: relative;
     z-index: 5;
     width: 100%;
-    max-width: 520px;
-    padding: 20px;
+    max-width: 600px;
+    padding: 0 20px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
   }
 
-  /* ─── PLAYER ─── */
-  .player-wrap {
+  /* ─── PLAYER AREA ─── */
+  .player-box {
     position: relative;
     width: 100%;
-    padding-top: 56.25%;
-    border-radius: 16px;
-    overflow: hidden;
     background: #000;
-    box-shadow:
-      0 0 0 1px var(--border),
-      0 0 40px var(--glow),
-      0 24px 48px rgba(0,0,0,0.6);
-  }
-  .player-wrap::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    border-radius: 16px;
-    box-shadow: inset 0 0 0 1.5px rgba(59,130,246,0.3);
-    pointer-events: none;
-  }
-  .player-wrap iframe,
-  .player-wrap #player-container {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    z-index: 1;
+    border-radius: 20px;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    box-shadow: 0 0 0 1px var(--border-color), 0 20px 50px rgba(0,0,0,0.8);
+    overflow: hidden;
   }
 
-  .player-label {
+  /* Neon Glow effect behind player */
+  .player-box::before {
+    content: '';
     position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 3;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    z-index: -1;
+    filter: blur(15px);
+    opacity: 0.35;
+  }
+
+  .player-box iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+    border-radius: 18px;
+    z-index: 5;
+  }
+
+  .player-badge {
+    position: absolute;
+    top: 15px; left: 15px;
+    z-index: 10;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 30px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(6px);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 11px;
+    gap: 8px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 1px;
-    color: var(--accent2);
-    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
   }
-  .player-label span {
-    width: 6px; height: 6px;
+  .player-badge .dot {
+    width: 8px; height: 8px;
     background: var(--red);
     border-radius: 50%;
     animation: pulse-badge 1.5s infinite;
   }
 
-  /* ─── DIVIDER ─── */
-  .divider {
+  /* ─── INFO BANNER (Explains offline streams) ─── */
+  .info-banner {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
-    color: var(--muted);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
   }
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+  .info-banner svg { width: 18px; height: 18px; fill: #fbbf24; flex-shrink: 0; margin-top: 2px;}
 
-  /* ─── CARDS ─── */
+  /* ─── GLASS CARDS ─── */
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px;
-    backdrop-filter: blur(8px);
+    background: var(--surface-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 20px;
   }
 
   .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
   }
 
   /* ─── DROPDOWN SELECTOR ─── */
+  .select-wrapper {
+    position: relative;
+  }
   .custom-select {
     width: 100%;
-    padding: 14px 16px;
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    outline: none;
-    cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2360a5fa%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 16px top 50%;
-    background-size: 12px auto;
-    transition: all 0.2s ease;
+    background: var(--surface-solid);
+    color: #fff;
+    border: 1px solid var(--border-color);
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
   }
   .custom-select:hover, .custom-select:focus {
-    border-color: rgba(59,130,246,0.5);
-    box-shadow: 0 0 15px rgba(59,130,246,0.2);
+    border-color: var(--accent-1);
+    box-shadow: 0 0 20px rgba(59,130,246,0.15);
+    outline: none;
   }
   .custom-select option {
-    background: var(--surface2);
-    color: var(--text);
+    background: #111;
+    color: #fff;
+    padding: 10px;
+  }
+  .select-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    width: 16px; height: 16px;
+    fill: var(--accent-1);
   }
 
-  /* ─── SHARE BTN ─── */
-  .share-btn {
+  /* ─── BUTTONS ─── */
+  .btn-primary {
     width: 100%;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background: linear-gradient(135deg, var(--accent), #1d4ed8);
-    border: none;
-    border-radius: 14px;
-    padding: 15px;
-    color: #fff;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(59,130,246,0.25);
   }
-  .share-btn:hover {
+  .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(59,130,246,0.5);
+    box-shadow: 0 15px 35px rgba(59,130,246,0.4);
   }
-  .share-btn svg { width: 18px; height: 18px; fill: #fff; }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;}
 
   /* ─── TOAST ─── */
   .toast {
     position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #1a2a1a;
-    border: 1px solid #22c55e;
-    color: #86efac;
-    padding: 10px 20px;
+    bottom: 30px; left: 50%;
+    transform: translate(-50%, 20px);
+    background: #064e3b;
+    border: 1px solid #10b981;
+    color: #a7f3d0;
+    padding: 12px 24px;
     border-radius: 30px;
+    font-weight: 500;
     font-size: 14px;
-    font-weight: 600;
-    z-index: 200;
+    z-index: 100;
     opacity: 0;
-    transition: all 0.3s ease;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+  }
 
-  .footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 8px; z-index: 5; position: relative;}
+  .footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 13px;
+    color: var(--text-muted);
+    z-index: 5;
+    position: relative;
+  }
+
 </style>
 </head>
 <body>
 
-<!-- TOAST NOTIFICATION -->
-<div class="toast" id="toast">✓ Link copied to clipboard</div>
+<div class="toast" id="toast">✓ Stream link copied to clipboard!</div>
 
-<!-- NAV -->
+<!-- NAVBAR -->
 <nav class="navbar">
-  <div class="logo">DILLZY</div>
+  <div class="logo">GW TEAM</div>
   <div class="nav-dot"></div>
 </nav>
 
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 <div class="container">
 
-  <!-- PLAYER -->
-  <div class="player-wrap">
-    <div class="player-label"><span></span> <b id="currentChannelName">Live Stream</b></div>
+  <!-- VIDEO PLAYER -->
+  <div class="player-box">
+    <div class="player-badge">
+      <div class="dot"></div> <span id="currentChannelName">Loading...</span>
+    </div>
     <div id="player-container"></div>
   </div>
 
-  <!-- DROPDOWN CARD -->
-  <div class="card">
-    <div class="card-title">Select Channel</div>
-    <select id="channelSelect" class="custom-select"></select>
+  <!-- SERVER INFO NOTICE -->
+  <div class="info-banner">
+    <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 4l7.5 13h-15L12 6zm-1 4v5h2v-5h-2zm0 7v2h2v-2h-2z"/></svg>
+    <span><b>Note:</b> If a stream (like Hindi) shows an error or doesn't load, the host server is currently offline. Please switch to another channel from the list below.</span>
   </div>
 
-  <div class="divider">Share</div>
-
-  <!-- SHARE CARD -->
+  <!-- CHANNEL SELECTOR -->
   <div class="card">
-    <div class="card-title">Share This Stream</div>
-    <button class="share-btn" id="shareBtn">
-      <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-      Copy Stream Link
+    <div class="card-title">Switch Channel</div>
+    <div class="select-wrapper">
+      <select id="channelSelect" class="custom-select"></select>
+      <svg class="select-icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+    </div>
+  </div>
+
+  <!-- SHARE -->
+  <div class="card">
+    <div class="card-title">Share Direct Link</div>
+    <button class="btn-primary" id="shareBtn">
+      <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+      Copy Channel Link
     </button>
   </div>
 
+  <div class="footer">© 2025 GW TEAM · Built for Seamless Streaming</div>
+
 </div>
 
-<div class="footer">© 2025 DILLZY · All rights reserved</div>
-
 <script>
-// ─── EMBEDDED JSON DATA ───
+// ─── JSON DATA ───
 const streamData = {
   "iframes": [
+    { "id": "eng", "name": "Star Sports Select (Default)", "iframeSrc": "https://allrounder-live4.pages.dev/star/star-1" },
     { "id": "hindi", "name": "Star Sports Hindi", "iframeSrc": "https://allrounder-live4.pages.dev/star/star-1-hindi" },
-    { "id": "eng", "name": "Star Sports Select", "iframeSrc": "https://allrounder-live4.pages.dev/star/star-1" },
     { "id": "cricbuzz", "name": "Cricbuzz", "iframeSrc": "https://allrounder-live4.pages.dev/channel/cricbuzz" },
     { "id": "wpl", "name": "Hotstar WPL", "iframeSrc": "https://allrounderlive.pages.dev/cric-life" },
     { "id": "asiacup", "name": "Asia Cup", "iframeSrc": "https://allrounderlive.pages.dev/player?url=https://d3ssd0juqbxbw.cloudfront.net/mtvsinstlive/master.m3u8" },
     { "id": "willow", "name": "Willow TV", "iframeSrc": "https://allrounder-live4.pages.dev/channel/willow" },
     { "id": "willow-2", "name": "Willow TV 2", "iframeSrc": "https://allrounderlive.pages.dev/willow2" },
     { "id": "willow-sports", "name": "Willow Sports", "iframeSrc": "https://cricketstan.github.io/Willow-Sports/" },
-    { "id": "alt", "name": "DILLZY (Alt)", "iframeSrc": "https://allrounderlive.pages.dev/player?url=https://dillzy.cricketstream745.workers.dev/live.m3u8" },
+    { "id": "alt", "name": "GW TEAM (Alt Stream)", "iframeSrc": "https://allrounderlive.pages.dev/player?url=https://dillzy.cricketstream745.workers.dev/live.m3u8" },
     { "id": "fox", "name": "Fox Cricket 501", "iframeSrc": "https://allrounder-live2.pages.dev/channel/fox" },
     { "id": "fox-hd", "name": "Fox Cricket HD", "iframeSrc": "https://cricketstan.github.io/Fox-Cricket-/" },
     { "id": "channel-7", "name": "7 Plus Cricket", "iframeSrc": "https://allrounderlive.pages.dev/player?url=https://hugh.cdn.rumble.cloud/live/gi29le7p/slot-139/bx1o-9vac_720p/chunklist.m3u8" },
@@ -373,7 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const playerContainer = document.getElementById("player-container");
   const channelNameLabel = document.getElementById("currentChannelName");
   
-  // Check if URL has ?id= parameter
+  // Read URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   let currentId = urlParams.get("id");
 
@@ -385,31 +399,32 @@ document.addEventListener("DOMContentLoaded", function () {
     select.appendChild(option);
   });
 
-  // Function to load iframe
+  // Load Iframe Function
   function loadStream(id) {
     const match = streamData.iframes.find(item => item.id === id);
     if (match && match.iframeSrc) {
       playerContainer.innerHTML = `<iframe src="${match.iframeSrc}" allow="encrypted-media; autoplay" allowfullscreen></iframe>`;
       channelNameLabel.innerText = match.name;
       
-      // Update browser URL without reloading page (makes the Share link accurate)
+      // Update URL silently so copying the link shares the correct channel
       window.history.replaceState(null, null, "?id=" + id);
       select.value = id;
     }
   }
 
-  // Handle Dropdown Change
+  // Detect Dropdown Change
   select.addEventListener("change", function(e) {
     loadStream(e.target.value);
   });
 
-  // Initial Load (Defaults to the first channel in the list if no ?id is provided)
+  // ─── DEFAULT LOGIC ───
+  // If no ID in the link, or the ID doesn't exist, default to 'eng' (Star Sports Select)
   if (!currentId || !streamData.iframes.find(i => i.id === currentId)) {
-    currentId = streamData.iframes[0].id;
+    currentId = 'eng'; 
   }
   loadStream(currentId);
 
-  // ─── SHARE BTN LOGIC ───
+  // ─── SHARE BUTTON ───
   const toast = document.getElementById("toast");
   document.getElementById("shareBtn").onclick = function () {
     navigator.clipboard.writeText(window.location.href).then(() => {
