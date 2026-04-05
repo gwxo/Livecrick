@@ -4,117 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gw Team | Premium Stream Player</title>
-    <!-- Import open-source HLS.js library -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         /* Base Reset */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            width: 100vw; height: 100vh;
-            background-color: #000; overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
-        }
+        html, body { width: 100vw; height: 100vh; background-color: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: white; }
 
         /* Video Container */
-        .player-container {
-            position: relative; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            background: #000;
-        }
-
-        video {
-            width: 100%; height: 100%;
-            object-fit: contain; outline: none;
-            cursor: pointer;
-        }
+        .player-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000; }
+        video { width: 100%; height: 100%; object-fit: contain; outline: none; cursor: pointer; }
 
         /* --- GW TEAM BRANDING & STATUS --- */
         .branding {
-            position: absolute; top: 25px; left: 30px; z-index: 10;
-            font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
-            display: flex; align-items: center; pointer-events: none;
-            transition: opacity 0.5s ease;
+            position: absolute; top: 25px; left: 30px; z-index: 10; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: 2px 2px 6px rgba(0,0,0,0.9); display: flex; align-items: center; pointer-events: none; transition: opacity 0.5s ease;
         }
         .branding::before {
-            content: ''; display: inline-block; width: 12px; height: 12px;
-            background-color: #00ff66; border-radius: 50%; margin-right: 10px;
+            content: ''; display: inline-block; width: 12px; height: 12px; background-color: #00ff66; border-radius: 50%; margin-right: 10px;
             box-shadow: 0 0 10px #00ff66; animation: pulse 1.5s infinite alternate;
         }
         .network-status {
-            position: absolute; top: 65px; left: 30px; z-index: 10;
-            font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.6);
-            padding: 5px 10px; border-radius: 4px; pointer-events: none;
-            color: #00ff66; transition: opacity 0.5s ease;
+            position: absolute; top: 65px; left: 30px; z-index: 10; font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.6);
+            padding: 5px 10px; border-radius: 4px; pointer-events: none; color: #00ff66; transition: opacity 0.5s ease;
         }
         @keyframes pulse { 0% { box-shadow: 0 0 5px #00ff66; opacity: 0.8; } 100% { box-shadow: 0 0 15px #00ff66, 0 0 20px #00ff66; opacity: 1; } }
 
         /* --- CUSTOM UI CONTROLS --- */
         .controls-wrapper {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-            padding: 60px 20px 20px 20px; z-index: 10;
-            display: flex; flex-direction: column; gap: 10px;
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            padding: 60px 20px 20px 20px; z-index: 10; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.4s ease, transform 0.4s ease;
         }
-        
-        .controls-wrapper.hidden {
-            opacity: 0; transform: translateY(20px); pointer-events: none;
-        }
+        .controls-wrapper.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
 
-        /* Progress Bar */
         .progress-container { width: 100%; display: flex; align-items: center; cursor: pointer; }
-        input[type="range"] {
-            -webkit-appearance: none; width: 100%; background: transparent; height: 6px; cursor: pointer;
-        }
-        input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%;
-            background: #00ff66; box-shadow: 0 0 8px #00ff66; margin-top: -4px; transition: transform 0.1s;
-        }
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; height: 6px; cursor: pointer; }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 8px #00ff66; margin-top: -4px; transition: transform 0.1s; }
         input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.3); }
 
-        /* Buttons Row */
-        .buttons-row {
-            display: flex; align-items: center; justify-content: space-between;
-        }
+        .buttons-row { display: flex; align-items: center; justify-content: space-between; }
         .left-controls, .right-controls { display: flex; align-items: center; gap: 15px; }
-        
-        button {
-            background: none; border: none; color: white; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0.8; transition: opacity 0.2s, transform 0.2s;
-        }
+        button { background: none; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; }
         button:hover { opacity: 1; transform: scale(1.1); }
         button svg { width: 28px; height: 28px; fill: white; }
 
         .time-display { font-size: 14px; font-weight: 500; opacity: 0.9; font-variant-numeric: tabular-nums; }
-        
         .volume-container { display: flex; align-items: center; gap: 8px; }
         #volume-bar { width: 80px; }
 
-        /* Big Center Play Button & Spinner */
-        .center-action {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 5; pointer-events: none; transition: opacity 0.3s ease;
-        }
-        .big-play {
-            background: rgba(0,0,0,0.6); border-radius: 50%; width: 80px; height: 80px;
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(4px); border: 2px solid rgba(255,255,255,0.2);
-            opacity: 0; transform: scale(0.8); transition: all 0.3s ease;
-        }
+        .center-action { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; transition: opacity 0.3s ease; }
+        .big-play { background: rgba(0,0,0,0.6); border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); border: 2px solid rgba(255,255,255,0.2); opacity: 0; transform: scale(0.8); transition: all 0.3s ease; }
         .big-play svg { width: 40px; height: 40px; margin-left: 5px; fill: white; }
         .player-container.paused .big-play { opacity: 1; transform: scale(1); pointer-events: auto; cursor: pointer;}
 
-        .spinner {
-            width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.2);
-            border-top: 5px solid #00ff66; border-radius: 50%; animation: spin 1s linear infinite;
-            display: none;
-        }
+        .spinner { width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.2); border-top: 5px solid #00ff66; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
         .player-container.loading .spinner { display: block; }
         .player-container.loading .big-play { display: none; }
 
@@ -124,37 +67,24 @@
 <body>
 
     <div class="player-container paused" id="player-container">
-        
-        <!-- Branding -->
         <div class="branding" id="branding"><span>Gw Team</span></div>
-        <div class="network-status" id="status-text">VPN Node: Securing Connection...</div>
+        <div class="network-status" id="status-text">Connecting...</div>
 
-        <!-- Center Actions (Play/Loader) -->
         <div class="center-action">
             <div class="spinner" id="spinner"></div>
-            <div class="big-play" id="big-play-btn">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </div>
+            <div class="big-play" id="big-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
         </div>
 
-        <!-- Video Element (Controls Removed) -->
         <video id="video" playsinline></video>
 
-        <!-- Custom Controls UI -->
         <div class="controls-wrapper" id="controls">
-            <!-- Progress Bar -->
-            <div class="progress-container">
-                <input type="range" id="progress-bar" value="0" max="100" step="0.1">
-            </div>
-            
+            <div class="progress-container"><input type="range" id="progress-bar" value="0" max="100" step="0.1"></div>
             <div class="buttons-row">
-                <!-- Left: Play/Pause, Volume, Time -->
                 <div class="left-controls">
                     <button id="play-pause-btn">
                         <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         <svg id="pause-icon" viewBox="0 0 24 24" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
-                    
                     <div class="volume-container">
                         <button id="mute-btn">
                             <svg id="vol-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -162,56 +92,70 @@
                         </button>
                         <input type="range" id="volume-bar" value="1" max="1" step="0.05">
                     </div>
-
-                    <div class="time-display">
-                        <span id="current-time">00:00</span> / <span id="duration">00:00</span>
-                    </div>
+                    <div class="time-display"><span id="current-time">00:00</span> / <span id="duration">00:00</span></div>
                 </div>
-
-                <!-- Right: Fullscreen -->
                 <div class="right-controls">
-                    <button id="fullscreen-btn">
-                        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-                    </button>
+                    <button id="fullscreen-btn"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. CORE VARIABLES ---
         const video = document.getElementById('video');
-        const originalStreamUrl = "https://tgs5.myturn1.top:8088/mobile/stream5_320p/playlist.m3u8?id=19&pk=641a646e0ad17f9baaf3f910c201e2e2790b6cd2375d5b2889966f22d4b2b3cf38a12fcc0da990b4ea35ab56a7c14ec203c037e2aa66757e758da7d7aba37a8b";
-        const cfWorkerUrl = "https://gw-proxy.codewithprashant07.workers.dev/?url="; 
-
-        // --- 2. HLS / PROXY ENGINE ---
         const statusText = document.getElementById('status-text');
+        
+        // ==========================================
+        // 1. LINK & PROXY SETTINGS
+        // ==========================================
+        
+        // NEW UPDATED LINK
+        const originalStreamUrl = "https://tgs5.myturn1.top:8088/mobile/stream5_320p/playlist.m3u8?id=19&pk=641a646e0ad17f9baaf3f910c201e2e2790b6cd2375d5b2889966f22d4b2b3cf38a12fcc0da990b4ea35ab56a7c14ec203c037e2aa66757e758da7d7aba37a8b";
+        
+        // CF WORKER SETTINGS
+        const cfWorkerUrl = "https://gw-proxy.codewithprashant07.workers.dev/?url="; 
+        
+        // 🔴🔴 DEBUG TOGGLE: Set to 'false' to test if the link is dead/expired
+        const useVPN = true; 
+        // ==========================================
+
         const hlsConfig = {
             enableWorker: true, maxBufferLength: 30, maxMaxBufferLength: 600, 
             maxBufferSize: 60 * 1000 * 1000, lowLatencyMode: true,
             xhrSetup: function(xhr, url) {
-                if (!url.includes("gw-proxy.codewithprashant07.workers.dev")) {
+                if (useVPN && !url.includes("gw-proxy.codewithprashant07.workers.dev")) {
                     xhr.open('GET', cfWorkerUrl + encodeURIComponent(url), true);
-                } else { xhr.open('GET', url, true); }
+                } else { 
+                    xhr.open('GET', url, true); 
+                }
             }
         };
 
         if (Hls.isSupported()) {
             const hls = new Hls(hlsConfig);
+            
+            statusText.innerText = useVPN ? "Securing via Cloudflare..." : "Connecting Direct...";
+            
             hls.loadSource(originalStreamUrl);
             hls.attachMedia(video);
+            
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                statusText.innerText = "Secured & Optimized. Ready.";
-                setTimeout(() => { statusText.style.opacity = '0'; }, 4000);
+                statusText.innerText = "Stream Ready.";
+                setTimeout(() => { statusText.style.opacity = '0'; }, 3000);
             });
             hls.on(Hls.Events.ERROR, function(event, data) {
-                if (data.fatal && data.type === Hls.ErrorTypes.NETWORK_ERROR) { hls.startLoad(); }
+                if (data.fatal) {
+                    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                        statusText.innerText = "Error: Link might be expired or IP locked.";
+                        statusText.style.color = "#ff3b30"; // Turn Red on error
+                    }
+                }
             });
         } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = cfWorkerUrl + encodeURIComponent(originalStreamUrl);
+            video.src = useVPN ? (cfWorkerUrl + encodeURIComponent(originalStreamUrl)) : originalStreamUrl;
         }
 
-        // --- 3. CUSTOM UI LOGIC ---
+        // --- CUSTOM UI LOGIC ---
         const playerContainer = document.getElementById('player-container');
         const controls = document.getElementById('controls');
         const playPauseBtn = document.getElementById('play-pause-btn');
@@ -228,10 +172,7 @@
         const fullscreenBtn = document.getElementById('fullscreen-btn');
         const branding = document.getElementById('branding');
 
-        // Play/Pause Toggle
-        function togglePlay() {
-            if (video.paused) { video.play(); } else { video.pause(); }
-        }
+        function togglePlay() { if (video.paused) { video.play(); } else { video.pause(); } }
         playPauseBtn.addEventListener('click', togglePlay);
         bigPlayBtn.addEventListener('click', togglePlay);
         video.addEventListener('click', togglePlay);
@@ -245,18 +186,15 @@
             playIcon.style.display = 'block'; pauseIcon.style.display = 'none';
         });
 
-        // Loading Spinner Logic
         video.addEventListener('waiting', () => playerContainer.classList.add('loading'));
         video.addEventListener('playing', () => playerContainer.classList.remove('loading'));
         video.addEventListener('canplay', () => playerContainer.classList.remove('loading'));
 
-        // Time Format Helper
         function formatTime(seconds) {
             const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60);
             return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // Progress Bar Updates
         video.addEventListener('timeupdate', () => {
             if (!video.duration) return;
             const percent = (video.currentTime / video.duration) * 100;
@@ -265,65 +203,43 @@
             currentTimeEl.innerText = formatTime(video.currentTime);
         });
         
-        video.addEventListener('loadedmetadata', () => {
-            durationEl.innerText = formatTime(video.duration);
-        });
+        video.addEventListener('loadedmetadata', () => { durationEl.innerText = formatTime(video.duration); });
+        progressBar.addEventListener('input', (e) => { video.currentTime = (e.target.value / 100) * video.duration; });
 
-        progressBar.addEventListener('input', (e) => {
-            const seekTime = (e.target.value / 100) * video.duration;
-            video.currentTime = seekTime;
-        });
-
-        // Volume & Mute
         volumeBar.addEventListener('input', (e) => {
-            video.volume = e.target.value;
-            video.muted = e.target.value === "0";
-            updateVolumeUI();
+            video.volume = e.target.value; video.muted = e.target.value === "0"; updateVolumeUI();
         });
 
         muteBtn.addEventListener('click', () => {
-            video.muted = !video.muted;
-            if(!video.muted && video.volume === 0) video.volume = 0.5; // Reset if muted while 0
-            volumeBar.value = video.muted ? 0 : video.volume;
-            updateVolumeUI();
+            video.muted = !video.muted; if(!video.muted && video.volume === 0) video.volume = 0.5;
+            volumeBar.value = video.muted ? 0 : video.volume; updateVolumeUI();
         });
 
         function updateVolumeUI() {
             const vol = volumeBar.value;
             volumeBar.style.background = `linear-gradient(to right, #00ff66 ${vol*100}%, rgba(255,255,255,0.2) ${vol*100}%)`;
-            if (video.muted || vol == 0) {
-                volIcon.style.display = 'none'; muteIcon.style.display = 'block';
-            } else {
-                volIcon.style.display = 'block'; muteIcon.style.display = 'none';
-            }
+            if (video.muted || vol == 0) { volIcon.style.display = 'none'; muteIcon.style.display = 'block'; } 
+            else { volIcon.style.display = 'block'; muteIcon.style.display = 'none'; }
         }
-        updateVolumeUI(); // Init colors
+        updateVolumeUI();
 
-        // Fullscreen Toggle
         fullscreenBtn.addEventListener('click', () => {
             if (!document.fullscreenElement) {
-                if (playerContainer.requestFullscreen) { playerContainer.requestFullscreen(); }
-                else if (playerContainer.webkitRequestFullscreen) { playerContainer.webkitRequestFullscreen(); }
+                if (playerContainer.requestFullscreen) playerContainer.requestFullscreen();
+                else if (playerContainer.webkitRequestFullscreen) playerContainer.webkitRequestFullscreen();
             } else {
-                if (document.exitFullscreen) { document.exitFullscreen(); }
-                else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
             }
         });
 
-        // Auto-Hide Controls when mouse stops moving
         let hideTimeout;
         function showControls() {
-            controls.classList.remove('hidden');
-            branding.style.opacity = '0.85';
-            document.body.style.cursor = 'default';
+            controls.classList.remove('hidden'); branding.style.opacity = '0.85'; document.body.style.cursor = 'default';
             clearTimeout(hideTimeout);
-            
-            // Only hide controls if the video is currently playing
             if (!video.paused) {
                 hideTimeout = setTimeout(() => {
-                    controls.classList.add('hidden');
-                    branding.style.opacity = '0';
-                    document.body.style.cursor = 'none';
+                    controls.classList.add('hidden'); branding.style.opacity = '0'; document.body.style.cursor = 'none';
                 }, 2500);
             }
         }
@@ -332,6 +248,5 @@
         playerContainer.addEventListener('mouseleave', () => { if (!video.paused) controls.classList.add('hidden'); });
         video.addEventListener('play', showControls);
     </script>
-
 </body>
 </html>
